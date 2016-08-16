@@ -9,6 +9,7 @@ class Inup_SocialConnect_Block_Login extends Mage_Core_Block_Template
 {
     protected $clientWeibo = null;
     protected $clientQq = null;
+    protected $clientWechat = null;
 
     protected $numEnabled = 0;
     protected $numDescShown = 0;
@@ -20,9 +21,11 @@ class Inup_SocialConnect_Block_Login extends Mage_Core_Block_Template
 
         $this->clientWeibo = Mage::getSingleton('inup_socialconnect/weibo_oauth_client');
         $this->clientQq = Mage::getSingleton('inup_socialconnect/qq_oauth_client');
+        $this->clientWechat = Mage::getSingleton('inup_socialconnect/wechat_oauth_client');
 
         if (!$this->_weiboEnabled() &&
-            !$this->_qqEnabled()
+            !$this->_qqEnabled() &&
+            !$this->_wechatEnabled()
         ) {
             return;
         }
@@ -32,6 +35,10 @@ class Inup_SocialConnect_Block_Login extends Mage_Core_Block_Template
         }
 
         if ($this->_qqEnabled()) {
+            $this->numEnabled++;
+        }
+
+        if ($this->_wechatEnabled()) {
             $this->numEnabled++;
         }
 
@@ -63,6 +70,10 @@ class Inup_SocialConnect_Block_Login extends Mage_Core_Block_Template
     protected function _qqEnabled()
     {
         return $this->clientQq->isEnabled();
+    }
+
+    protected function _wechatEnabled() {
+        return $this->clientWechat->isEnabled();
     }
 
 }

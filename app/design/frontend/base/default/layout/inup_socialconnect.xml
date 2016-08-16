@@ -12,6 +12,16 @@
                 <type>skin_css</type>
                 <name>inup_socialconnect/qq/css/button.css</name>
             </action>
+            <action method="addItem"
+                    ifconfig="customer/inup_socialconnect_wechat_web/enabled">
+                <type>skin_css</type>
+                <name>inup_socialconnect/wechat/css/button.css</name>
+            </action>
+            <action method="addItem"
+                    ifconfig="customer/inup_socialconnect_wechat_qr/enabled">
+                <type>skin_css</type>
+                <name>inup_socialconnect/wechat/css/button.css</name>
+            </action>
         </reference>
     </default>
 
@@ -26,6 +36,7 @@
             <block type="inup_socialconnect/login" name="inup_socialconnect_login">
                 <block type="inup_socialconnect/weibo_button" name="inup_socialconnect_weibo_login_button"/>
                 <block type="inup_socialconnect/qq_button" name="inup_socialconnect_qq_login_button"/>
+                <block type="inup_socialconnect/wechat_button" name="inup_socialconnect_wechat_login_button"/>
             </block>
         </reference>
     </customer_account_login>
@@ -44,6 +55,7 @@
             <block type="inup_socialconnect/register" name="inup_socialconnect_register">
                 <block type="inup_socialconnect/weibo_button" name="inup_socialconnect_checkout_weibo_button"/>
                 <block type="inup_socialconnect/qq_button" name="inup_socialconnect_checkout_qq_button"/>
+                <block type="inup_socialconnect/wechat_button" name="inup_socialconnect_checkout_wechat_button"/>
             </block>
         </reference>
     </customer_account_create>
@@ -110,6 +122,7 @@
             <block type="inup_socialconnect/checkout" name="inup_socialconnect_checkout">
                 <block type="inup_socialconnect/weibo_button" name="inup_socialconnect_checkout_weibo_button"/>
                 <block type="inup_socialconnect/qq_button" name="inup_socialconnect_checkout_qq_button"/>
+                <block type="inup_socialconnect/wechat_button" name="inup_socialconnect_checkout_wechat_button"/>
             </block>
         </reference>
     </checkout_onepage_index>

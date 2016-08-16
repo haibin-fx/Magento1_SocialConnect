@@ -14,5 +14,12 @@
                 <?php echo $this->getChildHtml('inup_socialconnect_checkout_qq_button') ?>
             </div>
         <?php endif; ?>
+        <?php if ($this->_wechatEnabled()): ?>
+            <div class="<?php echo $this->_getCol(); ?> inup-socialconnect-checkout-wechat">
+                <h3><?php echo $this->__('Wechat Connect') ?></h3>
+                <p><?php echo $this->__('You can continue with checkout using your <strong>Wechat</strong> account.') ?></p>
+                <?php echo $this->getChildHtml('inup_socialconnect_checkout_wechat_button') ?>
+            </div>
+        <?php endif; ?>
     </div>
 </div>

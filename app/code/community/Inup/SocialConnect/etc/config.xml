@@ -13,6 +13,12 @@
             <inup_socialconnect_qq>
                 <enabled>0</enabled>
             </inup_socialconnect_qq>
+            <inup_socialconnect_wechat_web>
+                <enabled>0</enabled>
+            </inup_socialconnect_wechat_web>
+            <inup_socialconnect_wechat_qr>
+                <enabled>0</enabled>
+            </inup_socialconnect_wechat_qr>
         </customer>
     </default>
     <frontend>

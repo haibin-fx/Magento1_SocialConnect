@@ -18,5 +18,14 @@
                 </div>
             </div>
         <?php endif; ?>
+        <?php if ($this->_wechatEnabled()): ?>
+            <div class="<?php echo $this->_getCol(); ?> inup-socialconnect-register-wechat">
+                <div class="fieldset">
+                    <h2 class="legend"><?php echo $this->__('Wechat Connect') ?></h2>
+                    <p><?php echo $this->__('You can register using your Wechat account.') ?></p>
+                    <p><?php echo $this->getChildHtml('inup_socialconnect_checkout_wechat_button') ?></p>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 </div>

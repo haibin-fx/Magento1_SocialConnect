@@ -2,6 +2,6 @@ app/code/community/Inup/SocialConnect/                          app/code/communi
 app/design/frontend/base/default/layout/Inup_socialconnect.xml  app/design/frontend/base/default/layout/Inup_socialconnect.xml 
 app/design/frontend/base/default/template/Inup/socialconnect/   app/design/frontend/base/default/template/Inup/socialconnect/
 app/etc/modules/Inup_SocialConnect.xml                          app/etc/modules/Inup_SocialConnect.xml
-skin/frontend/base/default/Inup_socialconnect/                  skin/frontend/base/default/Inup_socialconnect/
+skin/frontend/base/default/inup_socialconnect/                  skin/frontend/base/default/inup_socialconnect/
 app/locale/zh_CN/Inup_SocialConnect.csv                         app/locale/zh_CN/Inup_SocialConnect.csv
 app/locale/en_US/Inup_SocialConnect.csv                         app/locale/en_US/Inup_SocialConnect.csv

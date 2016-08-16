@@ -10,6 +10,7 @@ $installer->startSetup();
 
 $installer->setCustomerAttributes(
     array(
+        //qq
         'inup_socialconnect_qid' => array(
             'type' => 'text',
             'visible' => false,
@@ -22,6 +23,7 @@ $installer->setCustomerAttributes(
             'required' => false,
             'user_defined' => false
         ),
+        //weibo
         'inup_socialconnect_wid' => array(
             'type' => 'text',
             'visible' => false,
@@ -34,6 +36,7 @@ $installer->setCustomerAttributes(
             'required' => false,
             'user_defined' => false
         ),
+        //wechat
         'inup_socialconnect_cid' => array(
             'type' => 'text',
             'visible' => false,
