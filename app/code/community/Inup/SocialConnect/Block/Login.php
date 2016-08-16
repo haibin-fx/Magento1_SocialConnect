@@ -1,10 +1,10 @@
 <?php
+
 /**
  * User: GROOT (pzyme@outlook.com)
  * Date: 2016/8/15
  * Time: 10:13
  */
-
 class Inup_SocialConnect_Block_Login extends Mage_Core_Block_Template
 {
     protected $clientWeibo = null;
@@ -14,22 +14,24 @@ class Inup_SocialConnect_Block_Login extends Mage_Core_Block_Template
     protected $numDescShown = 0;
     protected $numButtShown = 0;
 
-    protected function _construct() {
+    protected function _construct()
+    {
         parent::_construct();
 
         $this->clientWeibo = Mage::getSingleton('inup_socialconnect/weibo_oauth_client');
         $this->clientQq = Mage::getSingleton('inup_socialconnect/qq_oauth_client');
 
-        if(!$this->_weiboEnabled() &&
-            !$this->_qqEnabled()) {
+        if (!$this->_weiboEnabled() &&
+            !$this->_qqEnabled()
+        ) {
             return;
         }
 
-        if($this->_weiboEnabled()) {
+        if ($this->_weiboEnabled()) {
             $this->numEnabled++;
         }
 
-        if($this->_qqEnabled()) {
+        if ($this->_qqEnabled()) {
             $this->numEnabled++;
         }
 
@@ -40,17 +42,17 @@ class Inup_SocialConnect_Block_Login extends Mage_Core_Block_Template
 
     protected function _getColSet()
     {
-        return 'col'.$this->numEnabled.'-set';
+        return 'col' . $this->numEnabled . '-set';
     }
 
     protected function _getDescCol()
     {
-        return 'col-'.++$this->numDescShown;
+        return 'col-' . ++$this->numDescShown;
     }
 
     protected function _getButtCol()
     {
-        return 'col-'.++$this->numButtShown;
+        return 'col-' . ++$this->numButtShown;
     }
 
     protected function _weiboEnabled()
@@ -60,9 +62,7 @@ class Inup_SocialConnect_Block_Login extends Mage_Core_Block_Template
 
     protected function _qqEnabled()
     {
-        //todo qq support
-        return false;
-        //return $this->clientQq->isEnabled();
+        return $this->clientQq->isEnabled();
     }
 
 }

@@ -33,6 +33,18 @@ $installer->setCustomerAttributes(
             'visible' => false,
             'required' => false,
             'user_defined' => false
+        ),
+        'inup_socialconnect_cid' => array(
+            'type' => 'text',
+            'visible' => false,
+            'required' => false,
+            'user_defined' => false
+        ),
+        'inup_socialconnect_ctoken' => array(
+            'type' => 'text',
+            'visible' => false,
+            'required' => false,
+            'user_defined' => false
         )
     )
 );

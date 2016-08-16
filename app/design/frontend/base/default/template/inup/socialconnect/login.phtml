@@ -1,7 +1,7 @@
 <div class="inup-socialconnect-login">
     <div class="account-login">
         <div class="<?php echo $this->_getColSet(); ?> inup-socialconnect-login-upper">
-            <?php if($this->_weiboEnabled()): ?>
+            <?php if ($this->_weiboEnabled()): ?>
                 <div class="<?php echo $this->_getDescCol(); ?> new-users inup-socialconnect-login-upper-weibo">
                     <div class="content">
                         <h2><?php echo $this->__('weibo Connect'); ?></h2>
@@ -9,7 +9,7 @@
                     </div>
                 </div>
             <?php endif; ?>
-            <?php if($this->_qqEnabled()): ?>
+            <?php if ($this->_qqEnabled()): ?>
                 <div class="<?php echo $this->_getDescCol(); ?> new-users inup-socialconnect-login-upper-qq">
                     <div class="content">
                         <h2><?php echo $this->__('qq Connect'); ?></h2>
@@ -19,14 +19,14 @@
             <?php endif; ?>
         </div>
         <div class="<?php echo $this->_getColSet(); ?> inup-socialconnect-login-lower">
-            <?php if($this->_weiboEnabled()): ?>
+            <?php if ($this->_weiboEnabled()): ?>
                 <div class="<?php echo $this->_getButtCol(); ?> inup-socialconnect-login-lower-weibo">
                     <div class="buttons-set">
                         <?php echo $this->getChildHtml('inup_socialconnect_weibo_login_button'); ?>
                     </div>
                 </div>
             <?php endif; ?>
-            <?php if($this->_qqEnabled()): ?>
+            <?php if ($this->_qqEnabled()): ?>
                 <div class="<?php echo $this->_getButtCol(); ?> inup-socialconnect-login-lower-qq">
                     <div class="buttons-set">
                         <?php echo $this->getChildHtml('inup_socialconnect_qq_login_button'); ?>

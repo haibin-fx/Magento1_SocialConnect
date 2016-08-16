@@ -1,28 +1,29 @@
 <?php
+
 /**
  * User: GROOT (pzyme@outlook.com)
  * Date: 2016/8/15
  * Time: 10:13
  */
-
 class Inup_SocialConnect_Helper_Weibo extends Mage_Core_Helper_Abstract
 {
 
-    public function disconnect(Mage_Customer_Model_Customer $customer) {
+    public function disconnect(Mage_Customer_Model_Customer $customer)
+    {
         Mage::getSingleton('customer/session')
             ->unsInupSocialconnectWeiboUserinfo();
 
         $pictureFilename = Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA)
-            .DS
-            .'inup'
-            .DS
-            .'socialconnect'
-            .DS
-            .'weibo'
-            .DS
-            .$customer->getInupSocialconnectWid();
+            . DS
+            . 'inup'
+            . DS
+            . 'socialconnect'
+            . DS
+            . 'weibo'
+            . DS
+            . $customer->getInupSocialconnectWid();
 
-        if(file_exists($pictureFilename)) {
+        if (file_exists($pictureFilename)) {
             @unlink($pictureFilename);
         }
 
@@ -53,12 +54,12 @@ class Inup_SocialConnect_Helper_Weibo extends Mage_Core_Helper_Abstract
 
         $name = explode(' ', $name, 2);
 
-        if(count($name) > 1) {
+        if (count($name) > 1) {
             $firstName = $name[0];
             $lastName = $name[1];
         } else {
-            $firstName = mb_substr($name[0],0,1);
-            $lastName = mb_substr($name[0],1);
+            $firstName = mb_substr($name[0], 0, 1);
+            $lastName = mb_substr($name[0], 1);
         }
 
         $customer->setEmail($email)
@@ -78,7 +79,7 @@ class Inup_SocialConnect_Helper_Weibo extends Mage_Core_Helper_Abstract
 
     public function loginByCustomer(Mage_Customer_Model_Customer $customer)
     {
-        if($customer->getConfirmation()) {
+        if ($customer->getConfirmation()) {
             $customer->setConfirmation(null);
             $customer->save();
         }
@@ -95,14 +96,14 @@ class Inup_SocialConnect_Helper_Weibo extends Mage_Core_Helper_Abstract
             ->addAttributeToFilter('inup_socialconnect_wid', $weiboId)
             ->setPageSize(1);
 
-        if($customer->getSharingConfig()->isWebsiteScope()) {
+        if ($customer->getSharingConfig()->isWebsiteScope()) {
             $collection->addAttributeToFilter(
                 'website_id',
                 Mage::app()->getWebsite()->getId()
             );
         }
 
-        if(Mage::getSingleton('customer/session')->isLoggedIn()) {
+        if (Mage::getSingleton('customer/session')->isLoggedIn()) {
             $collection->addFieldToFilter(
                 'entity_id',
                 array('neq' => Mage::getSingleton('customer/session')->getCustomerId())
@@ -120,14 +121,14 @@ class Inup_SocialConnect_Helper_Weibo extends Mage_Core_Helper_Abstract
             ->addFieldToFilter('email', $email)
             ->setPageSize(1);
 
-        if($customer->getSharingConfig()->isWebsiteScope()) {
+        if ($customer->getSharingConfig()->isWebsiteScope()) {
             $collection->addAttributeToFilter(
                 'website_id',
                 Mage::app()->getWebsite()->getId()
             );
         }
 
-        if(Mage::getSingleton('customer/session')->isLoggedIn()) {
+        if (Mage::getSingleton('customer/session')->isLoggedIn()) {
             $collection->addFieldToFilter(
                 'entity_id',
                 array('neq' => Mage::getSingleton('customer/session')->getCustomerId())
@@ -142,23 +143,23 @@ class Inup_SocialConnect_Helper_Weibo extends Mage_Core_Helper_Abstract
         $pictureUrl = str_replace('_normal', '', $pictureUrl);
 
         $url = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA)
-            .'inup'
-            .'/'
-            .'socialconnect'
-            .'/'
-            .'weibo'
-            .'/'
-            .$weiboId;
+            . 'inup'
+            . '/'
+            . 'socialconnect'
+            . '/'
+            . 'weibo'
+            . '/'
+            . $weiboId;
 
         $filename = Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA)
-            .DS
-            .'inup'
-            .DS
-            .'socialconnect'
-            .DS
-            .'weibo'
-            .DS
-            .$weiboId;
+            . DS
+            . 'inup'
+            . DS
+            . 'socialconnect'
+            . DS
+            . 'weibo'
+            . DS
+            . $weiboId;
 
         $directory = dirname($filename);
 
@@ -167,8 +168,9 @@ class Inup_SocialConnect_Helper_Weibo extends Mage_Core_Helper_Abstract
                 return null;
         }
 
-        if(!file_exists($filename) ||
-            (file_exists($filename) && (time() - filemtime($filename) >= 3600))){
+        if (!file_exists($filename) ||
+            (file_exists($filename) && (time() - filemtime($filename) >= 3600))
+        ) {
             $client = new Zend_Http_Client($pictureUrl);
             $client->setStream();
             $response = $client->request('GET');

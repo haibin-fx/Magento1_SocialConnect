@@ -1,4 +1,5 @@
 <?php
+
 /**
  * User: GROOT (pzyme@outlook.com)
  * Date: 2016/8/15
@@ -10,7 +11,7 @@ class Inup_SocialConnect_WeiboController extends Inup_SocialConnect_Controller_A
     public function requestAction()
     {
         $client = Mage::getSingleton('inup_socialconnect/weibo_oauth_client');
-        if(!($client->isEnabled())) {
+        if (!($client->isEnabled())) {
             $this->norouteAction();
         }
 
@@ -23,7 +24,7 @@ class Inup_SocialConnect_WeiboController extends Inup_SocialConnect_Controller_A
             Mage::getSingleton('core/session')->addError($e->getMessage());
             Mage::logException($e);
 
-            if(!empty($referer)) {
+            if (!empty($referer)) {
                 $this->_redirectUrl($referer);
             } else {
                 $this->norouteAction();
@@ -31,7 +32,8 @@ class Inup_SocialConnect_WeiboController extends Inup_SocialConnect_Controller_A
         }
     }
 
-    protected function _disconnectCallback(Mage_Customer_Model_Customer $customer) {
+    protected function _disconnectCallback(Mage_Customer_Model_Customer $customer)
+    {
         Mage::helper('inup_socialconnect/weibo')->disconnect($customer);
 
         Mage::getSingleton('core/session')
@@ -40,14 +42,15 @@ class Inup_SocialConnect_WeiboController extends Inup_SocialConnect_Controller_A
             );
     }
 
-    protected function _connectCallback() {
+    protected function _connectCallback()
+    {
         if (!($params = $this->getRequest()->getParams())
 
         ) {
             return $this;
         }
-        
-        if(!isset($params['code'])) {
+
+        if (!isset($params['code'])) {
             Mage::getSingleton('core/session')
                 ->addNotice(
                     $this->__('Weibo Connect process aborted.')
@@ -62,8 +65,8 @@ class Inup_SocialConnect_WeiboController extends Inup_SocialConnect_Controller_A
         $customersByWeiboId = Mage::helper('inup_socialconnect/weibo')
             ->getCustomersByWeiboId($client->getId());
 
-        if(Mage::getSingleton('customer/session')->isLoggedIn()) {
-            if($customersByWeiboId->getSize()) {
+        if (Mage::getSingleton('customer/session')->isLoggedIn()) {
+            if ($customersByWeiboId->getSize()) {
                 Mage::getSingleton('core/session')
                     ->addNotice(
                         $this->__('Your Weibo account is already connected to one of our store accounts.')
@@ -88,7 +91,7 @@ class Inup_SocialConnect_WeiboController extends Inup_SocialConnect_Controller_A
             return $this;
         }
 
-        if($customersByWeiboId->getSize()) {
+        if ($customersByWeiboId->getSize()) {
             // Existing connected user - login
             $customer = $customersByWeiboId->getFirstItem();
 
@@ -105,7 +108,7 @@ class Inup_SocialConnect_WeiboController extends Inup_SocialConnect_Controller_A
         $customersByEmail = Mage::helper('inup_socialconnect/weibo')
             ->getCustomersByEmail($info->getEmail());
 
-        if($customersByEmail->getSize()) {
+        if ($customersByEmail->getSize()) {
             // Email account already exists - attach, login
             $customer = $customersByEmail->getFirstItem();
 
@@ -124,7 +127,7 @@ class Inup_SocialConnect_WeiboController extends Inup_SocialConnect_Controller_A
 
         // New connection - create, attach, login
         $name = $info->getName();
-        if(empty($name)) {
+        if (empty($name)) {
             throw new Exception(
                 $this->__('Sorry, could not retrieve your Weibo name. Please try again.')
             );

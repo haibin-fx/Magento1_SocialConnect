@@ -1,4 +1,5 @@
 <?php
+
 /**
  * User: GROOT (pzyme@outlook.com)
  * Date: 2016/8/15
@@ -9,11 +10,12 @@ class Inup_SocialConnect_Block_Qq_Button extends Mage_Core_Block_Template
     protected $client = null;
     protected $userInfo = null;
 
-    protected function _construct() {
+    protected function _construct()
+    {
         parent::_construct();
 
         $this->client = Mage::getSingleton('inup_socialconnect/qq_oauth_client');
-        if(!($this->client->isEnabled())) {
+        if (!($this->client->isEnabled())) {
             return;
         }
 
@@ -27,7 +29,7 @@ class Inup_SocialConnect_Block_Qq_Button extends Mage_Core_Block_Template
 
     protected function _getButtonUrl()
     {
-        if(is_null($this->userInfo) || !$this->userInfo->hasData()) {
+        if (is_null($this->userInfo) || !$this->userInfo->hasData()) {
             return $this->client->createAuthUrl();
         } else {
             return $this->getUrl('socialconnect/qq/disconnect');
@@ -36,8 +38,8 @@ class Inup_SocialConnect_Block_Qq_Button extends Mage_Core_Block_Template
 
     protected function _getButtonText()
     {
-        if(is_null($this->userInfo) || !$this->userInfo->hasData()) {
-            if(!($text = Mage::registry('inup_socialconnect_button_text'))){
+        if (is_null($this->userInfo) || !$this->userInfo->hasData()) {
+            if (!($text = Mage::registry('inup_socialconnect_button_text'))) {
                 $text = $this->__('Connect');
             }
         } else {

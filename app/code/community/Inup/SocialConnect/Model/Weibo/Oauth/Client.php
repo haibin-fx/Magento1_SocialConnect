@@ -1,10 +1,10 @@
 <?php
+
 /**
  * User: GROOT (pzyme@outlook.com)
  * Date: 2016/8/15
  * Time: 10:13
  */
-
 class Inup_SocialConnect_Model_Weibo_Oauth_Client
 {
     const REDIRECT_URI_ROUTE = 'socialconnect/weibo/connect';
@@ -23,12 +23,12 @@ class Inup_SocialConnect_Model_Weibo_Oauth_Client
     protected $redirectUri = null;
     protected $client = null;
     protected $token = null;
-    
+
     protected $uid = null;
 
     public function __construct()
     {
-        if(($this->isEnabled = $this->_isEnabled())) {
+        if (($this->isEnabled = $this->_isEnabled())) {
             $this->clientId = $this->_getClientId();
             $this->clientSecret = $this->_getClientSecret();
             $this->redirectUri = Mage::getModel('core/url')->sessionUrlVar(
@@ -40,7 +40,7 @@ class Inup_SocialConnect_Model_Weibo_Oauth_Client
 
     public function isEnabled()
     {
-        return (bool) $this->isEnabled;
+        return (bool)$this->isEnabled;
     }
 
     public function getClient()
@@ -70,11 +70,11 @@ class Inup_SocialConnect_Model_Weibo_Oauth_Client
 
     public function getAccessToken($code = null)
     {
-        if($this->token) {
+        if ($this->token) {
             return $this->token;
         }
         $token = Mage::getSingleton('customer/session')->getInupSocialconnectWeiboAccessToken();
-        if($token) {
+        if ($token) {
             return $token;
         }
 
@@ -83,7 +83,8 @@ class Inup_SocialConnect_Model_Weibo_Oauth_Client
         return $token;
     }
 
-    public function fetchAccessToken($code) {
+    public function fetchAccessToken($code)
+    {
         $http = new Zend_Http_Client(self::OAUTH_TOKEN_URI);
         $http->setParameterPost('client_id', $this->clientId);
         $http->setParameterPost('client_secret', $this->clientSecret);
@@ -93,22 +94,25 @@ class Inup_SocialConnect_Model_Weibo_Oauth_Client
         $response = $http->request(Zend_Http_Client::POST)->getBody();
 
         $res = json_decode($response);
-        if(!isset($res->access_token)) {
+        if (!isset($res->access_token)) {
             throw new Exception(
                 Mage::helper('inup_socialconnect')
-                    ->__('Unable to retrieve request token.'.$res->error_description)
+                    ->__('Unable to retrieve request token.' . $res->error_description)
             );
         }
         $this->setAccessToken($res->access_token);
         $this->setId($res->uid);
         return $this->token;
     }
-    
-    public function setId($uid) {
+
+    public function setId($uid)
+    {
         Mage::getSingleton('customer/session')->setInupSocialconnectWeiboId($uid);
         $this->uid = $uid;
     }
-    public function getId() {
+
+    public function getId()
+    {
         $this->uid = Mage::getSingleton('customer/session')->getInupSocialconnectWeiboId();
         return $this->uid;
     }
@@ -117,9 +121,10 @@ class Inup_SocialConnect_Model_Weibo_Oauth_Client
     {
         return Mage::getUrl(self::REQUEST_TOKEN_URI_ROUTE);
     }
-    
-    public function redirectToAuthorize() {
-        $url = vsprintf(self::OAUTH_URI."?client_id=%s&response_type=code&redirect_uri=%s",[
+
+    public function redirectToAuthorize()
+    {
+        $url = vsprintf(self::OAUTH_URI . "?client_id=%s&response_type=code&redirect_uri=%s", [
             'client_id' => $this->clientId,
             'redirect_uri' => $this->redirectUri
         ]);
@@ -128,7 +133,7 @@ class Inup_SocialConnect_Model_Weibo_Oauth_Client
 
     public function api($endpoint, $method = 'GET', $params = array())
     {
-        $url = self::OAUTH_SERVICE_URI.$endpoint;
+        $url = self::OAUTH_SERVICE_URI . $endpoint;
 
         $response = $this->_httpRequest($url, strtoupper($method), $params);
 
@@ -138,7 +143,7 @@ class Inup_SocialConnect_Model_Weibo_Oauth_Client
     protected function _httpRequest($url, $method = 'GET', $params = array())
     {
         $client = new Zend_Http_Client($url);
-        
+
         switch ($method) {
             case 'GET':
                 $client->setMethod(Zend_Http_Client::GET);
@@ -160,14 +165,14 @@ class Inup_SocialConnect_Model_Weibo_Oauth_Client
 
         $response = $client->request();
 
-        Inup_SocialConnect_Helper_Data::log($response->getStatus().' - '. $response->getBody());
+        Inup_SocialConnect_Helper_Data::log($response->getStatus() . ' - ' . $response->getBody());
 
         $decodedResponse = json_decode($response->getBody());
 
-        if($response->isError()) {
+        if ($response->isError()) {
             $status = $response->getStatus();
-            if(($status == 400 || $status == 401 || $status == 429)) {
-                if(isset($decodedResponse->error->message)) {
+            if (($status == 400 || $status == 401 || $status == 429)) {
+                if (isset($decodedResponse->error->message)) {
                     $message = $decodedResponse->error->message;
                 } else {
                     $message = Mage::helper('inup_socialconnect')

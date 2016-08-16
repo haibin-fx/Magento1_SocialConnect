@@ -1,10 +1,10 @@
 <?php
+
 /**
  * User: GROOT (pzyme@outlook.com)
  * Date: 2016/8/15
  * Time: 10:13
  */
-
 class Inup_SocialConnect_Model_Weibo_Info extends Varien_Object
 {
     protected $params = [];
@@ -15,15 +15,17 @@ class Inup_SocialConnect_Model_Weibo_Info extends Varien_Object
 
     protected $client = null;
 
-    public function _construct() {
+    public function _construct()
+    {
         parent::_construct();
 
         $this->client = Mage::getSingleton('inup_socialconnect/weibo_oauth_client');
-        if(!($this->client->isEnabled())) {
+        if (!($this->client->isEnabled())) {
             return $this;
         }
         $this->params['access_token'] = $this->client->getAccessToken();
     }
+
     public function getClient()
     {
         return $this->client;
@@ -61,30 +63,39 @@ class Inup_SocialConnect_Model_Weibo_Info extends Varien_Object
         return $this;
     }
 
-    public function setUid($uid) {
+    public function setUid($uid)
+    {
         $this->uid = $uid;
     }
-    public function getUid() {
+
+    public function getUid()
+    {
         return $this->uid;
     }
 
-    public function setEmail($email) {
+    public function setEmail($email)
+    {
         $this->email = $email;
     }
 
-    public function getEmail() {
+    public function getEmail()
+    {
         return $this->email;
     }
-    public function setName($name) {
+
+    public function setName($name)
+    {
         $this->name = $name;
     }
-    public function getName() {
+
+    public function getName()
+    {
         return $this->name;
     }
 
     protected function _load()
     {
-        try{
+        try {
             $response = $this->client->api(
                 '/users/show.json',
                 'GET',
@@ -93,16 +104,16 @@ class Inup_SocialConnect_Model_Weibo_Info extends Varien_Object
 
             return $response;
 
-        } catch(Inup_SocialConnect_Weibo_Oauth_Exception $e) {
+        } catch (Inup_SocialConnect_Weibo_Oauth_Exception $e) {
             $this->_onException($e);
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             $this->_onException($e);
         }
     }
 
     protected function _onException($e)
     {
-        if($e instanceof Inup_SocialConnect_Weibo_Oauth_Exception) {
+        if ($e instanceof Inup_SocialConnect_Weibo_Oauth_Exception) {
             Mage::getSingleton('core/session')->addNotice($e->getMessage());
         } else {
             Mage::getSingleton('core/session')->addError($e->getMessage());

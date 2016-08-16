@@ -1,4 +1,5 @@
 <?php
+
 /**
  * User: GROOT (pzyme@outlook.com)
  * Date: 2016/8/15
@@ -7,7 +8,32 @@
 class Inup_SocialConnect_QqController extends Inup_SocialConnect_Controller_Abstract
 {
 
-    protected function _disconnectCallback(Mage_Customer_Model_Customer $customer) {
+    public function requestAction()
+    {
+        $client = Mage::getSingleton('inup_socialconnect/qq_oauth_client');
+        if (!($client->isEnabled())) {
+            $this->norouteAction();
+        }
+
+        try {
+            $client->redirectToAuthorize();
+        } catch (Exception $e) {
+            $referer = Mage::getSingleton('core/session')
+                ->getSocialConnectRedirect();
+
+            Mage::getSingleton('core/session')->addError($e->getMessage());
+            Mage::logException($e);
+
+            if (!empty($referer)) {
+                $this->_redirectUrl($referer);
+            } else {
+                $this->norouteAction();
+            }
+        }
+    }
+
+    protected function _disconnectCallback(Mage_Customer_Model_Customer $customer)
+    {
         Mage::helper('inup_socialconnect/qq')->disconnect($customer);
 
         Mage::getSingleton('core/session')
@@ -16,49 +42,30 @@ class Inup_SocialConnect_QqController extends Inup_SocialConnect_Controller_Abst
             );
     }
 
-    protected function _connectCallback() {
-        $errorCode = $this->getRequest()->getParam('error');
+    protected function _connectCallback()
+    {
         $code = $this->getRequest()->getParam('code');
         $state = $this->getRequest()->getParam('state');
-        if(!($errorCode || $code) && !$state) {
-            // Direct route access - deny
+        if (empty($code)) {
             return $this;
         }
 
-        if(!$state || $state != Mage::getSingleton('core/session')->getQqCsrf()) {
+        if (!$state || $state != Mage::getSingleton('core/session')->getQqState()) {
             return $this;
-        }
-
-        if($errorCode) {
-            if($errorCode === 'access_denied') {
-                Mage::getSingleton('core/session')
-                    ->addNotice(
-                        $this->__('QQ Connect process aborted.')
-                    );
-
-                return $this;
-            }
-
-            throw new Exception(
-                sprintf(
-                    $this->__('Sorry, "%s" error occured. Please try again.'),
-                    $errorCode
-                )
-            );
         }
 
         if ($code) {
-
-            $info = Mage::getModel('inup_socialconnect/qq_info')->load();
-
-            $token = $info->getClient()->getAccessToken();
+            $client = Mage::getSingleton('inup_socialconnect/qq_oauth_client');
+            $token = $client->getAccessToken();
+            $openid = $client->fetchOpenid($token);
+            $info = Mage::getModel('inup_socialconnect/qq_info')->load($openid);
 
             $customersByQqId = Mage::helper('inup_socialconnect/qq')
-                ->getCustomersByQqId($info->getId());
+                ->getCustomersByQqId($info->getOpenid());
 
-            if(Mage::getSingleton('customer/session')->isLoggedIn()) {
+            if (Mage::getSingleton('customer/session')->isLoggedIn()) {
                 // Logged in user
-                if($customersByQqId->getSize()) {
+                if ($customersByQqId->getSize()) {
                     Mage::getSingleton('core/session')
                         ->addNotice(
                             $this->__('Your QQ account is already connected to one of our store accounts.')
@@ -72,7 +79,7 @@ class Inup_SocialConnect_QqController extends Inup_SocialConnect_Controller_Abst
 
                 Mage::helper('inup_socialconnect/qq')->connectByQqId(
                     $customer,
-                    $info->getId(),
+                    $info->getOpenid(),
                     $token
                 );
 
@@ -83,7 +90,7 @@ class Inup_SocialConnect_QqController extends Inup_SocialConnect_Controller_Abst
                 return $this;
             }
 
-            if($customersByQqId->getSize()) {
+            if ($customersByQqId->getSize()) {
                 // Existing connected user - login
                 $customer = $customersByQqId->getFirstItem();
 
@@ -98,15 +105,15 @@ class Inup_SocialConnect_QqController extends Inup_SocialConnect_Controller_Abst
             }
 
             $customersByEmail = Mage::helper('inup_socialconnect/qq')
-                ->getCustomersByEmail($info->getEmailAddress());
+                ->getCustomersByEmail($info->getEmail());
 
-            if($customersByEmail->getSize()) {
+            if ($customersByEmail->getSize()) {
                 // Email account already exists - attach, login
                 $customer = $customersByEmail->getFirstItem();
 
                 Mage::helper('inup_socialconnect/qq')->connectByQqId(
                     $customer,
-                    $info->getId(),
+                    $info->getOpenid(),
                     $token
                 );
 
@@ -118,25 +125,17 @@ class Inup_SocialConnect_QqController extends Inup_SocialConnect_Controller_Abst
             }
 
             // New connection - create, attach, login
-            $firstName = $info->getFirstName();
-            if(empty($firstName)) {
+            $firstName = $info->getName();
+            if (empty($firstName)) {
                 throw new Exception(
                     $this->__('Sorry, could not retrieve your QQ first name. Please try again.')
                 );
             }
 
-            $lastName = $info->getLastName();
-            if(empty($lastName)) {
-                throw new Exception(
-                    $this->__('Sorry, could not retrieve your QQ last name. Please try again.')
-                );
-            }
-
             Mage::helper('inup_socialconnect/qq')->connectByCreatingAccount(
-                $info->getEmailAddress(),
-                $info->getFirstName(),
-                $info->getLastName(),
-                $info->getId(),
+                $info->getEmail(),
+                $info->getName(),
+                $info->getOpenid(),
                 $token
             );
 

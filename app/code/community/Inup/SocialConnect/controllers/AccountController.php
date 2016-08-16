@@ -1,4 +1,5 @@
 <?php
+
 /**
  * User: GROOT (pzyme@outlook.com)
  * Date: 2016/8/15
@@ -22,7 +23,8 @@ class Inup_SocialConnect_AccountController extends Mage_Core_Controller_Front_Ac
         if (!Mage::getSingleton('customer/session')
             ->unsBeforeAuthUrl()
             ->unsAfterAuthUrl()
-            ->authenticate($this)) {
+            ->authenticate($this)
+        ) {
             $this->setFlag('', 'no-dispatch', true);
         }
 
@@ -30,8 +32,9 @@ class Inup_SocialConnect_AccountController extends Mage_Core_Controller_Front_Ac
 
     public function weiboAction()
     {
-        if(!($userInfo = Mage::getSingleton('customer/session')
-                ->getInupSocialconnectWeiboUserinfo()) || !$userInfo->hasData()) {
+        if (!($userInfo = Mage::getSingleton('customer/session')
+                ->getInupSocialconnectWeiboUserinfo()) || !$userInfo->hasData()
+        ) {
 
             $userInfo = Mage::getSingleton('inup_socialconnect/weibo_info_user')
                 ->load();
