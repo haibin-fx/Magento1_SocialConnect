@@ -11,7 +11,7 @@ class Inup_SocialConnect_Block_Wechat_Qr_Adminhtml_System_Config_Form_Field_Link
 
     protected function getAuthProviderLink()
     {
-        return 'Weibo Developers';
+        return 'Wechat Developers';
     }
 
     protected function getAuthProviderLinkHref()

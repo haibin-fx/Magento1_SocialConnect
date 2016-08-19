@@ -77,7 +77,7 @@
                     </fields>
                 </inup_socialconnect_weibo>
                 <inup_socialconnect_qq translate="label" module="inup_socialconnect">
-                    <label>Social Connect qq Options</label>
+                    <label>Social Connect QQ Options</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>150</sort_order>
                     <show_in_default>1</show_in_default>
