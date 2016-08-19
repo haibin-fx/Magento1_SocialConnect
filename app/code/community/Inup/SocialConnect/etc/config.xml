@@ -31,6 +31,13 @@
                 </Inup_SocialConnect>
             </modules>
         </translate>
+        <layout>
+            <updates>
+                <inup_socialconnect>
+                    <file>inup_socialconnect.xml</file>
+                </inup_socialconnect>
+            </updates>
+        </layout>
         <routers>
             <inup_socialconnect>
                 <use>standard</use>
