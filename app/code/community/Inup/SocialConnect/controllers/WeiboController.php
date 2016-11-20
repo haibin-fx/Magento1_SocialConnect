@@ -81,7 +81,8 @@ class Inup_SocialConnect_WeiboController extends Inup_SocialConnect_Controller_A
             Mage::helper('inup_socialconnect/weibo')->connectByWeiboId(
                 $customer,
                 $client->getId(),
-                $token
+                $token,
+                $info->getName()
             );
 
             Mage::getSingleton('core/session')->addSuccess(
@@ -115,7 +116,8 @@ class Inup_SocialConnect_WeiboController extends Inup_SocialConnect_Controller_A
             Mage::helper('inup_socialconnect/weibo')->connectByWeiboId(
                 $customer,
                 $client->getId(),
-                $token
+                $token,
+                $info->getName()
             );
 
             Mage::getSingleton('core/session')->addSuccess(
@@ -133,18 +135,31 @@ class Inup_SocialConnect_WeiboController extends Inup_SocialConnect_Controller_A
             );
         }
 
-        Mage::helper('inup_socialconnect/weibo')->connectByCreatingAccount(
-            $info->getEmail(),
-            $info->getName(),
-            $client->getId(),
-            $token
-        );
 
-        Mage::getSingleton('core/session')->addSuccess(
-            $this->__('Your Weibo account is now connected to your new user account at our store. Now you can login using our Weibo Login button.')
-        );
+        $force_login = $client->_getForceLogin();
+        if($force_login == 1) {
 
-        return $this;
+            $session = Mage::getSingleton('customer/session');
+            $session->setSocialLoginToken($token);
+            $session->setSocialLoginType('weibo');
+            $session->setSocialLoginOpenid($client->getId());
+            $session->setSocialLoginInfoName($info->getName());
+
+            $this->_redirectUrl('/customer/account/create/');
+        } else {
+            Mage::helper('inup_socialconnect/weibo')->connectByCreatingAccount(
+                $info->getEmail(),
+                $info->getName(),
+                $client->getId(),
+                $token
+            );
+
+            Mage::getSingleton('core/session')->addSuccess(
+                $this->__('Your Weibo account is now connected to your new user account at our store. Now you can login using our Weibo Login button.')
+            );
+
+            return $this;
+        }
     }
 
 }

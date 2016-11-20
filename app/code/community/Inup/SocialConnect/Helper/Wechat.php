@@ -6,6 +6,9 @@
  */
 class Inup_SocialConnect_Helper_Wechat extends Mage_Core_Helper_Abstract
 {
+    public function getName($name) {
+        return Mage::helper('inup_socialconnect/name')->getName($name);
+    }
 
     public function disconnect(Mage_Customer_Model_Customer $customer)
     {
@@ -34,41 +37,43 @@ class Inup_SocialConnect_Helper_Wechat extends Mage_Core_Helper_Abstract
     public function connectByWechatId(
         Mage_Customer_Model_Customer $customer,
         $openid,
-        $token)
+        $token,
+        $name = null,
+        $emit_event = true)
     {
+
+        $parseName = $this->getName($name);
+        $customer->setFirstname($parseName[0])
+            ->setLastname($parseName[1]);
+
         $customer->setInupSocialconnectCid($openid)
             ->setInupSocialconnectCtoken($token)
             ->save();
 
-        Mage::getSingleton('customer/session')->setCustomerAsLoggedIn($customer);
+        if($emit_event) Mage::getSingleton('customer/session')->setCustomerAsLoggedIn($customer);
     }
 
     public function connectByCreatingAccount(
         $email,
         $name,
         $openid,
-        $token)
+        $token,
+        $generate_password = true)
     {
         $customer = Mage::getModel('customer/customer');
 
-        $name = explode(' ', $name, 2);
-
-        if (count($name) > 1) {
-            $firstName = $name[0];
-            $lastName = $name[1];
-        } else {
-            $firstName = mb_substr($name[0], 0, 1);
-            $lastName = mb_substr($name[0], 1);
-        }
+        $parseName = $this->getName($name);
 
         $customer->setEmail($email)
-            ->setFirstname($firstName)
-            ->setLastname($lastName)
+            ->setFirstname($parseName[0])
+            ->setLastname($parseName[1])
             ->setInupSocialconnectCid($openid)
-            ->setInupSocialconnectCtoken($token)
-            ->setPassword($customer->generatePassword(10))
-            ->save();
+            ->setInupSocialconnectCtoken($token);
 
+        if($generate_password) {
+            $customer->setPassword($customer->generatePassword(10));
+            $customer->save();
+        }
         $customer->setConfirmation(null);
         $customer->save();
 

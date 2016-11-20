@@ -18,6 +18,7 @@ class Inup_SocialConnect_Model_Qq_Oauth_Client
     const XML_PATH_ENABLED = 'customer/inup_socialconnect_qq/enabled';
     const XML_PATH_CLIENT_ID = 'customer/inup_socialconnect_qq/client_id';
     const XML_PATH_CLIENT_SECRET = 'customer/inup_socialconnect_qq/client_secret';
+    const XML_PATH_FORCE_LOGIN = 'customer/inup_socialconnect_qq/force_login';
 
     protected $clientId = null;
     protected $clientSecret = null;
@@ -233,6 +234,11 @@ class Inup_SocialConnect_Model_Qq_Oauth_Client
     protected function _getClientSecret()
     {
         return $this->_getStoreConfig(self::XML_PATH_CLIENT_SECRET);
+    }
+
+    public function _getForceLogin()
+    {
+        return $this->_getStoreConfig(self::XML_PATH_FORCE_LOGIN);
     }
 
     protected function _getStoreConfig($xmlPath)

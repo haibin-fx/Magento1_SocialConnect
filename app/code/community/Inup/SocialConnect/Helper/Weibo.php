@@ -8,6 +8,10 @@
 class Inup_SocialConnect_Helper_Weibo extends Mage_Core_Helper_Abstract
 {
 
+    public function getName($name) {
+        return Mage::helper('inup_socialconnect/name')->getName($name);
+    }
+
     public function disconnect(Mage_Customer_Model_Customer $customer)
     {
         Mage::getSingleton('customer/session')
@@ -35,41 +39,42 @@ class Inup_SocialConnect_Helper_Weibo extends Mage_Core_Helper_Abstract
     public function connectByWeiboId(
         Mage_Customer_Model_Customer $customer,
         $weiboId,
-        $token)
+        $token,
+        $name = null,
+        $emit_event = true)
     {
+        $parseName = $this->getName($name);
+        $customer->setFirstname($parseName[0])
+            ->setLastname($parseName[1]);
+
         $customer->setInupSocialconnectWid($weiboId)
             ->setInupSocialconnectWtoken($token)
             ->save();
 
-        Mage::getSingleton('customer/session')->setCustomerAsLoggedIn($customer);
+        if($emit_event) Mage::getSingleton('customer/session')->setCustomerAsLoggedIn($customer);
     }
 
     public function connectByCreatingAccount(
         $email,
         $name,
         $weiboId,
-        $token)
+        $token,
+        $generate_password = true)
     {
         $customer = Mage::getModel('customer/customer');
 
-        $name = explode(' ', $name, 2);
-
-        if (count($name) > 1) {
-            $firstName = $name[0];
-            $lastName = $name[1];
-        } else {
-            $firstName = mb_substr($name[0], 0, 1);
-            $lastName = mb_substr($name[0], 1);
-        }
+        $parseName = $this->getName($name);
 
         $customer->setEmail($email)
-            ->setFirstname($firstName)
-            ->setLastname($lastName)
+            ->setFirstname($parseName[0])
+            ->setLastname($parseName[1])
             ->setInupSocialconnectWid($weiboId)
-            ->setInupSocialconnectWtoken($token)
-            ->setPassword($customer->generatePassword(10))
-            ->save();
+            ->setInupSocialconnectWtoken($token);
 
+        if($generate_password) {
+            $customer->setPassword($customer->generatePassword(10));
+            $customer->save();
+        }
         $customer->setConfirmation(null);
         $customer->save();
 
