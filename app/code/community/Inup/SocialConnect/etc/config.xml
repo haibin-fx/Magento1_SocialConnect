@@ -9,15 +9,20 @@
         <customer>
             <inup_socialconnect_weibo>
                 <enabled>0</enabled>
+                <force_login>1</force_login>
             </inup_socialconnect_weibo>
             <inup_socialconnect_qq>
                 <enabled>0</enabled>
+                <force_login>1</force_login>
             </inup_socialconnect_qq>
             <inup_socialconnect_wechat_web>
                 <enabled>0</enabled>
+                <force_login>1</force_login>
+                <is_corp>0</is_corp>
             </inup_socialconnect_wechat_web>
             <inup_socialconnect_wechat_qr>
                 <enabled>0</enabled>
+                <force_login>1</force_login>
             </inup_socialconnect_wechat_qr>
         </customer>
     </default>
@@ -40,6 +45,19 @@
                 </args>
             </inup_socialconnect>
         </routers>
+
+        <events>
+            <customer_login>
+                <observers>
+                    <inup_socialconnect_customer_login>
+                        <type>model</type>
+                        <class>inup_socialconnect/observer</class>
+                        <method>SessionInit</method>
+                    </inup_socialconnect_customer_login>
+                </observers>
+            </customer_login>
+        </events>
+
     </frontend>
     <global>
         <models>

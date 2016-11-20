@@ -17,12 +17,19 @@ class Inup_SocialConnect_Model_Wechat_Oauth_Client
 
     const OAUTH_SERVICE_URI = 'https://api.weixin.qq.com';
 
+    const MODULE_PAYMENT_WEIXIN_CORP_ACCESS_TOKEN   = 'https://qyapi.weixin.qq.com/cgi-bin/gettoken?';
+    const MODULE_PAYMENT_WEIXIN_OAUTH2_CORP_OPENID = 'https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?';
+    const MODULE_PAYMENT_WEIXIN_CORP_USERID_TO_OPENID = 'https://qyapi.weixin.qq.com/cgi-bin/user/convert_to_openid?';
+
     const XML_PATH_WEB_ENABLED = 'customer/inup_socialconnect_wechat_web/enabled';
     const XML_PATH_WEB_CLIENT_ID = 'customer/inup_socialconnect_wechat_web/client_id';
     const XML_PATH_WEB_CLIENT_SECRET = 'customer/inup_socialconnect_wechat_web/client_secret';
     const XML_PATH_QR_ENABLED = 'customer/inup_socialconnect_wechat_qr/enabled';
     const XML_PATH_QR_CLIENT_ID = 'customer/inup_socialconnect_wechat_qr/client_id';
     const XML_PATH_QR_CLIENT_SECRET = 'customer/inup_socialconnect_wechat_qr/client_secret';
+    const XML_PATH_FORCE_LOGIN_WEB = 'customer/inup_socialconnect_wechat_web/force_login';
+    const XML_PATH_FORCE_LOGIN_QR = 'customer/inup_socialconnect_wechat_qr/force_login';
+    const XML_PATH_WEB_IS_CORP = 'customer/inup_socialconnect_wechat_web/is_corp';
 
     protected $clientId = null;
     protected $clientSecret = null;
@@ -83,6 +90,13 @@ class Inup_SocialConnect_Model_Wechat_Oauth_Client
 
     public function getAccessToken($code = null)
     {
+        if($this->isCorp()) {
+            $access_token = $this->GetCorpAccessToken();
+            $openid = $this->GetOpenidFromCorp($code, $access_token);
+            $this->setOpenid($openid);
+            return $access_token;
+        }
+
         if ($this->token) {
             return $this->token;
         }
@@ -116,6 +130,7 @@ class Inup_SocialConnect_Model_Wechat_Oauth_Client
         $this->setOpenid($res->openid);
         return $this->token;
     }
+
 
     public function setOpenid($openid)
     {
@@ -232,9 +247,208 @@ class Inup_SocialConnect_Model_Wechat_Oauth_Client
         return $this->_getStoreConfig($inside ? self::XML_PATH_WEB_CLIENT_SECRET : self::XML_PATH_QR_CLIENT_SECRET);
     }
 
+    public function _getForceLogin($inside)
+    {
+        return $this->_getStoreConfig($inside ? self::XML_PATH_FORCE_LOGIN_WEB : self::XML_PATH_FORCE_LOGIN_QR);
+    }
+
+    public function IsCorp() {
+        return $this->_getStoreConfig(self::XML_PATH_WEB_IS_CORP) == 1;
+    }
+
     protected function _getStoreConfig($xmlPath)
     {
         return Mage::getStoreConfig($xmlPath, Mage::app()->getStore()->getId());
     }
 
+
+
+
+    /**
+     * 获取企业号access_token
+     * @return bool|string
+     */
+    public function GetCorpAccessToken() {
+        $cache = Mage::getSingleton('core/cache');
+        $cache_key = 'wx_corp_access_token';
+        $access_token = $cache->load($cache_key);
+        if(!empty($access_token)) {
+            return $access_token;
+        }
+
+        $url = $this->createCorpAccessTokenUrl();
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,FALSE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST,FALSE);
+        curl_setopt($ch, CURLOPT_HEADER, FALSE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+
+        $res = curl_exec($ch);
+        curl_close($ch);
+
+        $access_token = '';
+
+        if ($data = json_decode($res, true)) {
+            if (isset($data['access_token'])) {
+                $access_token = $data['access_token'];
+            }
+        }
+
+        if (empty($access_token)) {
+            return false;
+        }
+
+        $cache->save($access_token, $cache_key, array(), 3500 * 2);
+
+        return $access_token;
+    }
+
+    /**
+     * 获取企业号openid
+     * @param $code
+     */
+    public function GetOpenidFromCorp($code, $access_token = null) {
+        $access_token = $access_token == null ? $this->GetCorpAccessToken() : $access_token;
+
+        $url = $this->createCorpOpenidUrl($access_token, $code);
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,FALSE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST,FALSE);
+        curl_setopt($ch, CURLOPT_HEADER, FALSE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+
+        $res = curl_exec($ch);
+        curl_close($ch);
+
+
+        $openid = '';
+
+        if ($data = json_decode($res, true)) {
+            if (isset($data['OpenId'])) {
+                $openid = $data['OpenId'];
+            }
+            if (isset($data['UserId'])) {
+                $openid = $this->corpUserIdToOpenid($access_token, $data['UserId']);
+            }
+        }
+
+        if (empty($openid)) {
+            return false;
+        }
+
+        return $openid;
+    }
+
+    /**
+     * 企业号userid转换成openid接口
+     * @param $access_token
+     * @param $user_id
+     */
+    public function corpUserIdToOpenid($access_token, $user_id) {
+
+        $url = $this->createCorpUseridToOpenidUrl($access_token);
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,FALSE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST,FALSE);
+        curl_setopt($ch, CURLOPT_HEADER, FALSE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array(
+            'userid' => $user_id
+        )));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: text/plain'));
+
+        $res = curl_exec($ch);
+        curl_close($ch);
+
+        $openid = '';
+
+        if ($data = json_decode($res, true)) {
+            if (isset($data['openid'])) {
+                $openid = $data['openid'];
+            }
+        }
+
+        if (empty($openid)) {
+            return false;
+        }
+
+        return $openid;
+
+    }
+    /**
+     * 构造获取企业号access token链接
+     * @return string
+     */
+    public function createCorpAccessTokenUrl() {
+        $params['corpid']     = $this->getClientId();
+        $params['corpsecret']    = $this->getClientSecret();
+
+        $str = $this->toUrlParams($params, false);
+        $url = self::MODULE_PAYMENT_WEIXIN_CORP_ACCESS_TOKEN . $str;
+
+        return $url;
+    }
+
+    /**
+     * 构造获取企业号openid链接
+     * @param $access_token
+     * @param $code
+     * @return string
+     */
+    public function createCorpOpenidUrl($access_token, $code) {
+        $params['access_token']     = $access_token;
+        $params['code']    = $code;
+
+        $str = $this->toUrlParams($params, false);
+        $url = self::MODULE_PAYMENT_WEIXIN_OAUTH2_CORP_OPENID . $str;
+
+        return $url;
+    }
+
+    /**
+     * 构造企业号userid转openid链接
+     * @param $access_token
+     */
+    public function createCorpUseridToOpenidUrl($access_token) {
+        $params['access_token']     = $access_token;
+
+        $str = $this->toUrlParams($params, false);
+        $url = self::MODULE_PAYMENT_WEIXIN_CORP_USERID_TO_OPENID . $str;
+
+        return $url;
+    }
+
+
+    public function toUrlParams($params, $url_encode = false)
+    {
+        $str = '';
+
+        ksort($params);
+
+        foreach ($params as $k => $v) {
+            if ($url_encode) {
+                $v = urlencode($v);
+            }
+
+            $str .= ($k . '=' . $v . '&');
+        }
+
+        if (strlen($str) > 0) {
+            $str = substr($str, 0, strlen($str)-1);
+        }
+
+        return $str;
+    }
 }

@@ -17,6 +17,7 @@ class Inup_SocialConnect_Model_Weibo_Oauth_Client
     const XML_PATH_ENABLED = 'customer/inup_socialconnect_weibo/enabled';
     const XML_PATH_CLIENT_ID = 'customer/inup_socialconnect_weibo/client_id';
     const XML_PATH_CLIENT_SECRET = 'customer/inup_socialconnect_weibo/client_secret';
+    const XML_PATH_FORCE_LOGIN = 'customer/inup_socialconnect_weibo/force_login';
 
     protected $clientId = null;
     protected $clientSecret = null;
@@ -208,7 +209,11 @@ class Inup_SocialConnect_Model_Weibo_Oauth_Client
     {
         return $this->_getStoreConfig(self::XML_PATH_CLIENT_SECRET);
     }
-
+    public function _getForceLogin()
+    {
+        return $this->_getStoreConfig(self::XML_PATH_FORCE_LOGIN);
+    }
+    
     protected function _getStoreConfig($xmlPath)
     {
         return Mage::getStoreConfig($xmlPath, Mage::app()->getStore()->getId());

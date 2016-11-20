@@ -59,7 +59,7 @@ class Inup_SocialConnect_QqController extends Inup_SocialConnect_Controller_Abst
             $token = $client->getAccessToken();
             $openid = $client->fetchOpenid($token);
             $info = Mage::getModel('inup_socialconnect/qq_info')->load($openid);
-
+            
             $customersByQqId = Mage::helper('inup_socialconnect/qq')
                 ->getCustomersByQqId($info->getOpenid());
 
@@ -80,7 +80,8 @@ class Inup_SocialConnect_QqController extends Inup_SocialConnect_Controller_Abst
                 Mage::helper('inup_socialconnect/qq')->connectByQqId(
                     $customer,
                     $info->getOpenid(),
-                    $token
+                    $token,
+                    $info->getName()
                 );
 
                 Mage::getSingleton('core/session')->addSuccess(
@@ -103,45 +104,58 @@ class Inup_SocialConnect_QqController extends Inup_SocialConnect_Controller_Abst
 
                 return $this;
             }
+            
+            $force_login = $client->_getForceLogin();
+            if($force_login == 1) {
 
-            $customersByEmail = Mage::helper('inup_socialconnect/qq')
-                ->getCustomersByEmail($info->getEmail());
+                $session = Mage::getSingleton('customer/session');
+                $session->setSocialLoginToken($token);
+                $session->setSocialLoginType('qq');
+                $session->setSocialLoginOpenid($openid);
+                $session->setSocialLoginInfoName($info->getName());
 
-            if ($customersByEmail->getSize()) {
-                // Email account already exists - attach, login
-                $customer = $customersByEmail->getFirstItem();
+                $this->_redirectUrl('/customer/account/create/');
+            } else {
+                $customersByEmail = Mage::helper('inup_socialconnect/qq')
+                    ->getCustomersByEmail($info->getEmail());
 
-                Mage::helper('inup_socialconnect/qq')->connectByQqId(
-                    $customer,
+                if ($customersByEmail->getSize()) {
+                    // Email account already exists - attach, login
+                    $customer = $customersByEmail->getFirstItem();
+
+                    Mage::helper('inup_socialconnect/qq')->connectByQqId(
+                        $customer,
+                        $info->getOpenid(),
+                        $token,
+                        $info->getName()
+                    );
+
+                    Mage::getSingleton('core/session')->addSuccess(
+                        $this->__('We have discovered you already have an account at our store. Your QQ account is now connected to your store account.')
+                    );
+
+                    return $this;
+                }
+
+                // New connection - create, attach, login
+                $firstName = $info->getName();
+                if (empty($firstName)) {
+                    throw new Exception(
+                        $this->__('Sorry, could not retrieve your QQ first name. Please try again.')
+                    );
+                }
+
+                Mage::helper('inup_socialconnect/qq')->connectByCreatingAccount(
+                    $info->getEmail(),
+                    $info->getName(),
                     $info->getOpenid(),
                     $token
                 );
 
                 Mage::getSingleton('core/session')->addSuccess(
-                    $this->__('We have discovered you already have an account at our store. Your QQ account is now connected to your store account.')
-                );
-
-                return $this;
-            }
-
-            // New connection - create, attach, login
-            $firstName = $info->getName();
-            if (empty($firstName)) {
-                throw new Exception(
-                    $this->__('Sorry, could not retrieve your QQ first name. Please try again.')
+                    $this->__('Your QQ account is now connected to your new user account at our store. Now you can login using our QQ Login button.')
                 );
             }
-
-            Mage::helper('inup_socialconnect/qq')->connectByCreatingAccount(
-                $info->getEmail(),
-                $info->getName(),
-                $info->getOpenid(),
-                $token
-            );
-
-            Mage::getSingleton('core/session')->addSuccess(
-                $this->__('Your QQ account is now connected to your new user account at our store. Now you can login using our QQ Login button.')
-            );
         }
     }
 

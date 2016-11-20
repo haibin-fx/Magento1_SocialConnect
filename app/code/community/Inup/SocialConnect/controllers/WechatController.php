@@ -67,6 +67,7 @@ class Inup_SocialConnect_WechatController extends Inup_SocialConnect_Controller_
 
         $info = Mage::getModel('inup_socialconnect/wechat_info')->load($client->getOpenid());
 
+        
         $customersByWechatId = Mage::helper('inup_socialconnect/wechat')
             ->getCustomersByWechatId($info->getOpenid());
 
@@ -86,7 +87,8 @@ class Inup_SocialConnect_WechatController extends Inup_SocialConnect_Controller_
             Mage::helper('inup_socialconnect/wechat')->connectByWechatId(
                 $customer,
                 $info->getOpenid(),
-                $token
+                $token,
+                $info->getName()
             );
 
             Mage::getSingleton('core/session')->addSuccess(
@@ -120,7 +122,8 @@ class Inup_SocialConnect_WechatController extends Inup_SocialConnect_Controller_
             Mage::helper('inup_socialconnect/wechat')->connectByWechatId(
                 $customer,
                 $info->getOpenid(),
-                $token
+                $token,
+                $info->getName()
             );
 
             Mage::getSingleton('core/session')->addSuccess(
@@ -138,18 +141,30 @@ class Inup_SocialConnect_WechatController extends Inup_SocialConnect_Controller_
             );
         }
 
-        Mage::helper('inup_socialconnect/wechat')->connectByCreatingAccount(
-            $info->getEmail(),
-            $info->getName(),
-            $info->getOpenid(),
-            $token
-        );
+        $force_login = $client->_getForceLogin($client->isWechatInside());
+        if($force_login == 1) {
 
-        Mage::getSingleton('core/session')->addSuccess(
-            $this->__('Your Wechat account is now connected to your new user account at our store. Now you can login using our Wechat Login button.')
-        );
+            $session = Mage::getSingleton('customer/session');
+            $session->setSocialLoginToken($token);
+            $session->setSocialLoginType('wechat');
+            $session->setSocialLoginOpenid($client->getOpenid());
+            $session->setSocialLoginInfoName($info->getName());
 
-        return $this;
+            $this->_redirectUrl('/customer/account/create/');
+        } else {
+            Mage::helper('inup_socialconnect/wechat')->connectByCreatingAccount(
+                $info->getEmail(),
+                $info->getName(),
+                $info->getOpenid(),
+                $token
+            );
+
+            Mage::getSingleton('core/session')->addSuccess(
+                $this->__('Your Wechat account is now connected to your new user account at our store. Now you can login using our Wechat Login button.')
+            );
+
+            return $this;
+        }
     }
 
 }
