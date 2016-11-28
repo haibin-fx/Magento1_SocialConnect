@@ -138,7 +138,9 @@ class Inup_SocialConnect_WeiboController extends Inup_SocialConnect_Controller_A
 
         $force_login = $client->_getForceLogin();
         if($force_login == 1) {
-
+            Mage::getSingleton('core/session')->addSuccess(
+                $this->__('Congratulations! Please login with our store account. Just once.')
+            );
             $session = Mage::getSingleton('customer/session');
             $session->setSocialLoginToken($token);
             $session->setSocialLoginType('weibo');
