@@ -160,9 +160,9 @@ class Inup_SocialConnect_Model_Wechat_Oauth_Client
                 $state
             ]);
         } else {
-            $url = vsprintf(self::OAUTH_QE_URI.'?appid=%s&redirect_uri=%s&response_type=code&scope=snsapi_userinfo&state=%s#wechat_redirect',[
+            $url = vsprintf(self::OAUTH_QE_URI.'?appid=%s&redirect_uri=%s&response_type=code&scope=snsapi_login&state=%s#wechat_redirect',[
                 $this->clientId,
-                $this->redirectUri,
+                urlencode($this->redirectUri),
                 $state
             ]);
         }
@@ -253,6 +253,9 @@ class Inup_SocialConnect_Model_Wechat_Oauth_Client
     }
 
     public function IsCorp() {
+        if(!$this->isWechatInside()) {
+            return false;
+        }
         return $this->_getStoreConfig(self::XML_PATH_WEB_IS_CORP) == 1;
     }
 

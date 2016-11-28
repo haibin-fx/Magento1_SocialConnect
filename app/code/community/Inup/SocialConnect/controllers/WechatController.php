@@ -143,7 +143,10 @@ class Inup_SocialConnect_WechatController extends Inup_SocialConnect_Controller_
 
         $force_login = $client->_getForceLogin($client->isWechatInside());
         if($force_login == 1) {
-
+            Mage::getSingleton('core/session')->addSuccess(
+                $this->__('Congratulations! Please login with our store account. Just once.')
+            );
+            
             $session = Mage::getSingleton('customer/session');
             $session->setSocialLoginToken($token);
             $session->setSocialLoginType('wechat');
